@@ -10,10 +10,6 @@ A playful Streamlit chat app that connects you to different "comms channels" —
 - **Status updates**: A live status widget shows "Establishing secure uplink" → "Decrypting..." → "Transmission received."
 - **Wipe channel logs**: Clear the current channel's history with one click.
 
-## Demo
-
-![Demo](image.png)
-
 ## Setup
 
 1. **Clone / copy this folder** to your machine.
