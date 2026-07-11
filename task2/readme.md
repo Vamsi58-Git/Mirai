@@ -11,8 +11,7 @@ A playful Streamlit chat app that connects you to different "comms channels" —
 - **Wipe channel logs**: Clear the current channel's history with one click.
 
 ## Demo
-
-![Demo] (image.png)
+![Demo](image.png)
 
 ## Setup
 
