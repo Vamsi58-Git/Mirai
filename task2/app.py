@@ -9,6 +9,7 @@ if not api_key:
     st.error("`API_KEY` environment variable not set.")
     st.stop()
 
+# Configure API
 genai.configure(api_key=api_key)
 
 st.title("🌀 The Void Console")
@@ -37,49 +38,25 @@ PERSONAS = {
 
 selected_persona = st.selectbox("Choose your Comms Channel:", options=list(PERSONAS.keys()), index=0)
 
-if "chat_histories" not in st.session_state:
-    st.session_state.chat_histories = {}
-if selected_persona not in st.session_state.chat_histories:
-    st.session_state.chat_histories[selected_persona] = []
+user_input = st.text_input("Transmit your message...")
+send_button = st.button("SEND")
 
-for msg in st.session_state.chat_histories[selected_persona]:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-if prompt := st.chat_input("Transmit your message..."):
-    st.chat_message("user").markdown(prompt)
-    st.session_state.chat_histories[selected_persona].append(
-        {"role": "user", "content": prompt}
-    )
-
+if send_button and user_input:
+    with st.chat_message("user"):
+        st.markdown(user_input)
+    
     system_instruction = PERSONAS[selected_persona]
-    history_text = "\n".join(
-        f"{m['role'].capitalize()}: {m['content']}"
-        for m in st.session_state.chat_histories[selected_persona]
-    )
-    full_prompt = f"{system_instruction}\n\nConversation so far:\n{history_text}\n\nAssistant:"
-
+    full_prompt = f"{system_instruction}\n\nUser: {user_input}\n\nAssistant:"
+    
     try:
         with st.status("📡 Establishing secure uplink...", expanded=False) as status:
             status.update(label="🧠 Decrypting and processing transmission...")
             model = genai.GenerativeModel("gemini-2.5-flash")
-            response = model.generate_content(full_prompt, stream=True)
-
-            answer_placeholder = st.empty()
-            full_answer = ""
-            for chunk in response:
-                if chunk.text:
-                    full_answer += chunk.text
-                    answer_placeholder.markdown(full_answer)
-
+            response = model.generate_content(full_prompt)
+            
+            with st.chat_message("assistant"):
+                st.markdown(response.text)
+                
             status.update(label="✅ Transmission received.", state="complete")
-
-        st.session_state.chat_histories[selected_persona].append(
-            {"role": "assistant", "content": full_answer}
-        )
     except Exception as e:
         st.error(f"⚠️ Uplink failure: {e}")
-
-if st.button("🧹 Wipe Channel Logs"):
-    st.session_state.chat_histories[selected_persona] = []
-    st.rerun()
