@@ -3,7 +3,7 @@ import urllib.parse
 import streamlit as st
 
 # --- Page Setup ---
-st.title("🎨 AI Image Studio")
+st.title("AI Image Studio")
 st.write("Describe anything you can imagine, pick a style, and let the AI paint it for you.")
 
 # --- Sidebar Settings ---
@@ -19,12 +19,12 @@ height = st.sidebar.slider("Height", min_value=256, max_value=1024, value=512, s
 
 speed_mode = st.sidebar.radio(
     "Generation Mode",
-    ["⚡ Fast (turbo)", "🎨 Quality (flux)"],
+    ["Fast (turbo)", "Quality (flux)"],
     index=0,
 )
 model_name = "turbo" if "Fast" in speed_mode else "flux"
 
-magic_enhance = st.sidebar.checkbox("✨ Enable Magic Enhance")
+magic_enhance = st.sidebar.checkbox("Enable Magic Enhance")
 
 # --- Surprise Me Prompt Bank (Task 4) ---
 SURPRISE_PROMPTS = [
@@ -39,26 +39,23 @@ SURPRISE_PROMPTS = [
 prompt = st.text_input("Describe your image")
 
 generate_clicked = st.button("Generate Image")
-surprise_clicked = st.button("🎲 Surprise Me!")
+surprise_clicked = st.button("Surprise Me!")
 
 
 def build_and_show_image(base_prompt: str):
-    """Builds the final prompt (with optional Magic Enhance), calls the
-    image API with width/height, displays the image, and offers a download."""
+    """Builds the final prompt, calls the image API, displays the image,
+    and offers a download."""
 
     full_prompt = f"{base_prompt}, {art_style} style"
 
-    # --- Task 3: Magic Enhance Toggle ---
     if magic_enhance:
         full_prompt += ", masterpiece, 8k resolution, highly detailed, trending on artstation, unreal engine 5 render"
 
-    # URL-encode the prompt so spaces/commas don't break the request
     encoded_prompt = urllib.parse.quote(full_prompt)
 
     import requests
     import time
 
-    # Try the selected model first, then fall back to the other one if it fails.
     models_to_try = [model_name, "flux" if model_name == "turbo" else "turbo"]
 
     per_attempt_timeout = 45
@@ -81,8 +78,6 @@ def build_and_show_image(base_prompt: str):
 
     if image_bytes:
         st.image(image_bytes, caption=full_prompt)
-
-        # --- Task 2: Fixed File Extension + Dynamic Filename ---
         st.download_button(
             label="Download Image",
             data=image_bytes,
@@ -99,14 +94,12 @@ def build_and_show_image(base_prompt: str):
         )
 
 
-# --- Generate Button Logic ---
 if generate_clicked:
     if not prompt:
         st.error("Please enter a prompt first.")
     else:
         build_and_show_image(prompt)
 
-# --- Task 4: Surprise Me Button Logic ---
 if surprise_clicked:
     random_prompt = random.choice(SURPRISE_PROMPTS)
     st.info(f"Surprise prompt: {random_prompt}")
